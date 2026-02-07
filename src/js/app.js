@@ -23,27 +23,82 @@ import "../style/index.css";
     }
  */
 function render(variables = {}) {
-  console.log("These are the current variables: ", variables); // print on the console
-  // here we ask the logical questions to make decisions on how to build the html
-  // if includeCover==false then we reset the cover code without the <img> tag to make the cover transparent.
-  let cover = `<div class="cover"><img src="${variables.background}" /></div>`;
-  if (variables.includeCover == false) cover = "<div class='cover'></div>";
-
-  // reset the website body with the new html output
-  document.querySelector("#widget_content").innerHTML = `<div class="widget">
-            ${cover}
-          <img src="${variables.avatarURL}" class="photo" />
-          <h1>${variables.name}${variables.lastName}</h1>
-          <h2>${variables.role}</h2>
-          <h3>${variables.city}, ${variables.country}</h3>
-          <ul class=" ${variables.socialMediaPosition}">
-            <li><a href="https://twitter.com/${variables.twitter}"><i class="fab fa-twitter"></i></a></li>
-            <li><a href="https://github.com/${variables.github}"><i class="fab fa-github"></i></a></li>
-            <li><a href="https://linkedin.com/school/${variables.linkedin}"><i class="fab fa-linkedin"></i></a></li>
-            <li><a href="https://instagram.com/${variables.instagram}"><i class="fab fa-instagram"></i></a></li>
-          </ul>
-        </div>
-    `;
+  console.log("These are the current variables: ", variables);
+  
+  // ============================================
+  // RENDERIZADO CONDICIONAL
+  // ============================================
+  
+  // 1. COVER: Solo mostrar si includeCover es true
+  const coverHTML = variables.includeCover 
+    ? `<div class="cover"><img src="${variables.background}" /></div>`
+    : '<div class="cover"></div>';
+  
+  // 2. NOMBRE COMPLETO: Solo mostrar si hay nombre O apellido
+  let nameHTML = '';
+  if (variables.name || variables.lastName) {
+    const fullName = `${variables.name || ''} ${variables.lastName || ''}`.trim();
+    nameHTML = `<h1>${fullName}</h1>`;
+  }
+  
+  // 3. ROL: Solo mostrar si existe
+  const roleHTML = variables.role 
+    ? `<h2>${variables.role}</h2>`
+    : '';
+  
+  // 4. UBICACIÓN: Solo mostrar si hay ciudad O país
+  let locationHTML = '';
+  if (variables.city || variables.country) {
+    // Crear array con los valores que existen
+    const locationParts = [
+      variables.city,
+      variables.country
+    ].filter(part => part); // Filtrar los null/undefined
+    
+    // Unir con coma
+    const location = locationParts.join(', ');
+    locationHTML = `<h3>${location}</h3>`;
+  }
+  
+  // 5. REDES SOCIALES: Solo mostrar las que tienen valor
+  const socialIcons = [];
+  
+  if (variables.twitter) {
+    socialIcons.push(`<li><a href="https://twitter.com/${variables.twitter}"><i class="fab fa-twitter"></i></a></li>`);
+  }
+  
+  if (variables.github) {
+    socialIcons.push(`<li><a href="https://github.com/${variables.github}"><i class="fab fa-github"></i></a></li>`);
+  }
+  
+  if (variables.linkedin) {
+    socialIcons.push(`<li><a href="https://linkedin.com/in/${variables.linkedin}"><i class="fab fa-linkedin"></i></a></li>`);
+  }
+  
+  if (variables.instagram) {
+    socialIcons.push(`<li><a href="https://instagram.com/${variables.instagram}"><i class="fab fa-instagram"></i></a></li>`);
+  }
+  
+  // Solo mostrar la lista de redes sociales si hay al menos una
+  const socialMediaHTML = socialIcons.length > 0
+    ? `<ul class="${variables.socialMediaPosition}">
+        ${socialIcons.join('')}
+      </ul>`
+    : '';
+  
+  // ============================================
+  // CONSTRUIR HTML FINAL
+  // ============================================
+  document.querySelector("#widget_content").innerHTML = `
+    <div class="widget">
+      ${coverHTML}
+      <img src="${variables.avatarURL}" class="photo" />
+      ${nameHTML}
+      ${roleHTML}
+      ${locationHTML}
+      ${socialMediaHTML}
+    </div>
+  `;
 }
 
 /**
